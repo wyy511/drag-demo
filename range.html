@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>鼠标拖动案例</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .page {
+            margin-top: 100px;
+        }
+        
+        h3 {
+            text-align: center;
+            margin-bottom: 100px;
+        }
+        
+        .lineDiv {
+            position: relative;
+            height: 5px;
+            background: red;
+            width: 300px;
+            margin: 5px auto;
+        }
+        
+        .lineDiv .minDiv {
+            position: absolute;
+            top: -5px;
+            left: 0;
+            width: 15px;
+            height: 15px;
+            background: green;
+            cursor: pointer;
+        }
+        
+        .lineDiv .minDiv .vals {
+            position: absolute;
+            font-size: 20px;
+            top: -45px;
+            left: -10px;
+            width: 35px;
+            height: 35px;
+            line-height: 2.1875rem;
+            text-align: center;
+            background: blue;
+        }
+        
+        .lineDiv .minDiv .vals:after {
+            content: '';
+            width: 0;
+            height: 0;
+            border-top: 6px solid blue;
+            border-right: 6px solid transparent;
+            border-left: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            display: block;
+            margin-left: 11px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+        <h3>用鼠标拖动小方块<span id="msg">0</span>%</h3>
+        <div id="lineDiv" class="lineDiv">
+            <div id="minDiv" class="minDiv">
+                <div id="vals" class="vals">0</div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    window.onload = function() {
+        var lineDiv = document.getElementById('lineDiv'); //长线条
+        var minDiv = document.getElementById('minDiv'); //小方块
+        var msg = document.getElementById('msg'); //数字消息
+        var vals = document.getElementById('vals'); //数值
+        var ifBool = false; //判断鼠标是否按下
+        // 鼠标按下方块
+        minDiv.addEventListener('mousedown', start);
+        minDiv.addEventListener('touchstart', start);
+
+        // 鼠标移动方块
+        window.addEventListener('mousemove', move);
+        window.addEventListener('touchmove', move);
+
+        // 鼠标放下方块
+        window.addEventListener('mouseup', end);
+        window.addEventListener('touchend', end);
+
+        function start(e) {
+            // 阻止默认事件
+            e.stopPropagation();
+            // 鼠标按下状态为true
+            ifBool = true;
+            console.log('down')
+        }
+
+        function end(e) {
+            ifBool = false;
+            console.log('end')
+        }
+
+        function move(e) {
+            // 如果鼠标已经按下了
+            if (ifBool) {
+                var x = null;
+                if (!e.touches) {
+                    // 兼容PC端
+                    x = e.clientX;
+                } else {
+                    // 兼容移动端
+                    x = e.touches[0].pageX;
+                }
+                var lineDiv_left = getPosition(lineDiv).left; //长线条的横坐标
+                var minDiv_left = x - lineDiv_left; //小方块相对于父元素（长线条）的left值
+                if (minDiv_left >= lineDiv.offsetWidth - 15) {
+                    minDiv_left = lineDiv.offsetWidth - 15;
+                }
+                if (minDiv_left < 0) {
+                    minDiv_left = 0;
+                }
+                // 设置拖动后小方块的left值
+                minDiv.style.left = minDiv_left + 'px';
+                msg.innerText = parseInt((minDiv_left / (lineDiv.offsetWidth - 15)) * 100);
+                vals.innerText = parseInt((minDiv_left / (lineDiv.offsetWidth - 15)) * 100);
+            }
+        }
+        // 获取元素的绝对位置
+        function getPosition(node) {
+            var left = node.offsetLeft; //获取元素相对于其父元素的left值
+            var top = node.offsetTop;
+            var current = node.offsetParent; //获取元素的offsetParent
+            // 一直循环直到根元素
+            while (current != null) {
+                left += current.offsetLeft;
+                top += current.offsetTop;
+                current = current.offsetParent;
+            }
+            return {
+                left: left,
+                top: top
+            }
+        }
+    }
+</script>
+
+</html>
